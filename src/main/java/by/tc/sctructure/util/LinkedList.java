@@ -1,11 +1,12 @@
-package by.tc.sctructure;
+package by.tc.sctructure.util;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class LinkedList<E> implements List<E> {
+public class LinkedList<E> implements List<E>, Serializable {
     private int size = 0;
     private Entry first = null;
     private Entry last = null;

@@ -1,8 +1,9 @@
-package by.tc.sctructure;
+package by.tc.sctructure.util;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class ArrayList<E> implements List<E> {
+public class ArrayList<E> implements List<E>,Serializable {
     private Object array[] = new Object[10];
     private int size = 0;
 
