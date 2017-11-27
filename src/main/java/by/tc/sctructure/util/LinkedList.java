@@ -22,6 +22,7 @@ public class LinkedList<E> implements List<E>, Serializable {
     }
 
     private class ListIteratorImpl implements ListIterator {
+        int elementIndex = 0;
         private Entry currentElement;
         private Entry addElement;
 
@@ -36,6 +37,7 @@ public class LinkedList<E> implements List<E>, Serializable {
         @Override
         public Object next() {
             currentElement = currentElement.nextEntry;
+            elementIndex++;
             return currentElement.value;
         }
 
@@ -51,21 +53,23 @@ public class LinkedList<E> implements List<E>, Serializable {
         public Object previous() {
             Entry entry = currentElement;
             if (currentElement.prevEntry == null) {
+                elementIndex = 0;
                 currentElement = addElement;
             } else {
                 currentElement = currentElement.prevEntry;
+                elementIndex--;
             }
             return entry.value;
         }
 
         @Override
         public int nextIndex() {
-            return 0;
+            return elementIndex;
         }
 
         @Override
         public int previousIndex() {
-            return 0;
+            return elementIndex - 1;
         }
 
         @Override
@@ -80,12 +84,14 @@ public class LinkedList<E> implements List<E>, Serializable {
 
         @Override
         public void set(Object o) {
-
+            if (currentElement != addElement) {
+                currentElement.value = o;
+            }
         }
 
         @Override
         public void add(Object o) {
-
+            LinkedList.this.add(elementIndex, o);
         }
 
         public ListIteratorImpl() {
@@ -103,14 +109,17 @@ public class LinkedList<E> implements List<E>, Serializable {
 
     @Override
     public boolean isEmpty() {
-        if (size == 0) {
-            return true;
-        }
-        return false;
+        return size == 0;
     }
 
     @Override
     public boolean contains(Object o) {
+        Entry entry = first;
+        while (entry!=null){
+            if(entry.value==o){
+                return true;
+            }
+        }
         return false;
     }
 
@@ -121,10 +130,10 @@ public class LinkedList<E> implements List<E>, Serializable {
 
     @Override
     public Object[] toArray() {
-        Object [] array = new Object[size];
+        Object[] array = new Object[size];
         Entry entry = first;
         int index = 0;
-        while (entry!=null){
+        while (entry != null) {
             array[index] = entry.value;
             index++;
             entry = entry.nextEntry;
@@ -137,7 +146,6 @@ public class LinkedList<E> implements List<E>, Serializable {
         if (size != 0) {
             last.nextEntry = new Entry(o);
             last.nextEntry.prevEntry = last;
-            //last.prevEntry = last;
             last = last.nextEntry;
         } else {
             Entry entry = new Entry(o);
@@ -175,17 +183,47 @@ public class LinkedList<E> implements List<E>, Serializable {
 
     @Override
     public boolean addAll(Collection c) {
-        return false;
+        Iterator iterator = c.iterator();
+        while (iterator.hasNext()) {
+            add(iterator.next());
+        }
+        return true;
     }
 
     @Override
     public boolean addAll(int index, Collection c) {
-        return false;
+        int currentIndex = 0;
+        Entry entry = first;
+        while (currentIndex != index && entry != last) {
+            currentIndex++;
+            entry = entry.nextEntry;
+            if (entry == last) {
+                return false;
+            }
+        }
+        Entry prevEntry = entry.prevEntry;
+        Entry nextEntry = entry.nextEntry;
+
+
+        Iterator iterator = c.iterator();
+        while (iterator.hasNext()) {
+            Entry addEntry = new Entry(iterator.next());
+            if (prevEntry != null) {
+                addEntry.prevEntry = prevEntry;
+                prevEntry.nextEntry = addEntry;
+            }
+            prevEntry = addEntry;
+        }
+        prevEntry.nextEntry = nextEntry;
+        nextEntry.prevEntry =  prevEntry;
+        return true;
     }
 
     @Override
     public void clear() {
-
+        first = null;
+        last = null;
+        size = 0;
     }
 
     @Override
@@ -225,7 +263,7 @@ public class LinkedList<E> implements List<E>, Serializable {
 
     @Override
     public ListIterator listIterator(int index) {
-        return null;
+        return new ListIteratorImpl();
     }
 
     @Override
@@ -250,6 +288,13 @@ public class LinkedList<E> implements List<E>, Serializable {
 
     @Override
     public Object[] toArray(Object[] a) {
-        return new Object[0];
+        Object[] arr = new Object[size];
+        int index = 0;
+        Entry entry = first;
+        while (entry != null) {
+            arr[index] = entry.value;
+            entry = entry.nextEntry;
+        }
+        return arr;
     }
 }
