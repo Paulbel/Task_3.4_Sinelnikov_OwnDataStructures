@@ -43,7 +43,7 @@ public class ArrayList<E> implements List<E>,Serializable {
         @Override
         public boolean hasPrevious() {
             trim();
-            if (currentPosition - 1 >= 0 && array[currentPosition - 1] != null) {
+            if (currentPosition - 1 >= 0) {
                 return true;
             }
             return false;
@@ -52,9 +52,6 @@ public class ArrayList<E> implements List<E>,Serializable {
         @Override
         public E previous() {
             trim();
-            if (currentPosition == 0) {
-                currentPosition--;
-            }
             currentPosition--;
             int pos = currentPosition;
 
@@ -63,12 +60,12 @@ public class ArrayList<E> implements List<E>,Serializable {
 
         @Override
         public int nextIndex() {
-            return currentPosition + 1;
+            return currentPosition ;
         }
 
         @Override
         public int previousIndex() {
-            return currentPosition - 1;
+            return currentPosition -1;
         }
 
         @Override
@@ -78,12 +75,12 @@ public class ArrayList<E> implements List<E>,Serializable {
 
         @Override
         public void set(Object o) {
-
+            array[currentPosition]=o;
         }
 
         @Override
         public void add(Object o) {
-
+            ArrayList.this.add(currentPosition,o);
         }
 
     }
@@ -111,7 +108,7 @@ public class ArrayList<E> implements List<E>,Serializable {
     }
 
     public Iterator<E> iterator() {
-        return null;
+        return new ListIteratorImpl();
     }
 
     public Object[] toArray() {
@@ -152,7 +149,17 @@ public class ArrayList<E> implements List<E>,Serializable {
     }
 
     public boolean addAll(int index, Collection c) {
-        return false;
+        Object[] a = c.toArray();
+        int arrayLength = a.length;
+        ensureCapacity(size+arrayLength);
+        int numMoved = size - index;
+        if (a.length > 0)
+            System.arraycopy(array, index, array, index + arrayLength,
+                    numMoved);
+
+        System.arraycopy(a, 0, array, index, arrayLength);
+        size += arrayLength;
+        return arrayLength != 0;
     }
 
     public void clear() {
