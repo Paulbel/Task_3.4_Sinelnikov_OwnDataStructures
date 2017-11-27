@@ -3,33 +3,29 @@ package by.tc.sctructure.util;
 import java.io.Serializable;
 import java.util.*;
 
-public class ArrayList<E> implements List<E>,Serializable {
-    private Object array[] = new Object[10];
-    private int size = 0;
+public class ArrayList<E> implements List<E>, Serializable {
+    private Object array[];
+    private int size;
 
+
+    public ArrayList(){
+        this.size = 0;
+        array = new Object[16];
+    }
+
+
+    @Override
     public int size() {
         return size;
     }
 
-    private void grow(int minCapacity) {
-        int oldCapacity = array.length;
-        int newCapacity = oldCapacity + (oldCapacity >> 1);
-        if (newCapacity - minCapacity < 0) {
-            newCapacity = minCapacity;
-        }
-        array = Arrays.copyOf(array, newCapacity);
-    }
-
     private class ListIteratorImpl implements ListIterator {
-        int currentPosition = 0;
+        private int currentPosition = 0;
 
         @Override
         public boolean hasNext() {
             trim();
-            if (currentPosition < size) {
-                return true;
-            }
-            return false;
+            return currentPosition < size;
         }
 
         @Override
@@ -54,18 +50,17 @@ public class ArrayList<E> implements List<E>,Serializable {
             trim();
             currentPosition--;
             int pos = currentPosition;
-
             return (E) array[pos];
         }
 
         @Override
         public int nextIndex() {
-            return currentPosition ;
+            return currentPosition;
         }
 
         @Override
         public int previousIndex() {
-            return currentPosition -1;
+            return currentPosition - 1;
         }
 
         @Override
@@ -75,29 +70,29 @@ public class ArrayList<E> implements List<E>,Serializable {
 
         @Override
         public void set(Object o) {
-            array[currentPosition]=o;
+            array[currentPosition] = o;
         }
 
         @Override
         public void add(Object o) {
-            ArrayList.this.add(currentPosition,o);
+            ArrayList.this.add(currentPosition, o);
         }
 
-    }
+        ListIteratorImpl() {
+        }
 
-    private void ensureCapacity(int newCapacity) {
-        if (newCapacity > array.length) {
-            grow(newCapacity);
+        ListIteratorImpl(int index) {
+            currentPosition = index;
         }
     }
 
+
+    @Override
     public boolean isEmpty() {
-        if (size == 0) {
-            return true;
-        }
-        return false;
+        return size == 0;
     }
 
+    @Override
     public boolean contains(Object o) {
         for (int index = 0; index < size; index++) {
             if (array[index].equals(o)) {
@@ -107,21 +102,25 @@ public class ArrayList<E> implements List<E>,Serializable {
         return false;
     }
 
+    @Override
     public Iterator<E> iterator() {
         return new ListIteratorImpl();
     }
 
+    @Override
     public Object[] toArray() {
         trim();
         return array;
     }
 
+    @Override
     public boolean add(Object o) {
         ensureCapacity(size + 1);
         array[size++] = o;
         return true;
     }
 
+    @Override
     public boolean remove(Object o) {
         if (o == null) {
             for (int index = 0; index < size; index++)
@@ -139,6 +138,7 @@ public class ArrayList<E> implements List<E>,Serializable {
         return false;
     }
 
+    @Override
     public boolean addAll(Collection c) {
         Iterator iterator = c.iterator();
         ensureCapacity(size + c.size());
@@ -148,10 +148,11 @@ public class ArrayList<E> implements List<E>,Serializable {
         return true;
     }
 
+    @Override
     public boolean addAll(int index, Collection c) {
         Object[] a = c.toArray();
         int arrayLength = a.length;
-        ensureCapacity(size+arrayLength);
+        ensureCapacity(size + arrayLength);
         int numMoved = size - index;
         if (a.length > 0)
             System.arraycopy(array, index, array, index + arrayLength,
@@ -162,10 +163,12 @@ public class ArrayList<E> implements List<E>,Serializable {
         return arrayLength != 0;
     }
 
+    @Override
     public void clear() {
-
+        array = new Object[0];
     }
 
+    @Override
     public E get(int index) {
         trim();
         if (index > size - 1) {
@@ -175,6 +178,7 @@ public class ArrayList<E> implements List<E>,Serializable {
         }
     }
 
+    @Override
     public Object set(int index, Object element) {
         trim();
         if (index > size - 1) {
@@ -185,6 +189,7 @@ public class ArrayList<E> implements List<E>,Serializable {
         }
     }
 
+    @Override
     public void add(int index, Object element) {
         trim();
         ensureCapacity(size + 1);
@@ -194,6 +199,7 @@ public class ArrayList<E> implements List<E>,Serializable {
         size++;
     }
 
+    @Override
     public E remove(int index) {
         Object e = array[index];
         System.arraycopy(array, index + 1, array, index,
@@ -202,12 +208,25 @@ public class ArrayList<E> implements List<E>,Serializable {
         return (E) e;
     }
 
+    @Override
     public int indexOf(Object o) {
-        return 0;
+        for (int index = 0; index < array.length; index++) {
+            if (array[index].equals(o)) {
+                return index;
+            }
+        }
+        return -1;
     }
 
+    @Override
     public int lastIndexOf(Object o) {
-        return 0;
+
+        for (int index = array.length; index >= 0; index--) {
+            if (array[index].equals(o)) {
+                return index;
+            }
+        }
+        return -1;
     }
 
     @Override
@@ -217,28 +236,48 @@ public class ArrayList<E> implements List<E>,Serializable {
 
     @Override
     public ListIterator<E> listIterator(int index) {
-        return null;
+        return new ListIteratorImpl(index);
     }
 
 
     public List subList(int fromIndex, int toIndex) {
-        return null;
+
+        List<E> list = new ArrayList<>();
+        for (int index = fromIndex; index < toIndex; index++) {
+            list.add((E) array[index]);
+        }
+        return list;
     }
 
+    @Override
     public boolean retainAll(Collection c) {
         return false;
     }
 
+    @Override
     public boolean removeAll(Collection c) {
-        return false;
+        Iterator iterator = c.iterator();
+        while (iterator.hasNext()) {
+            remove(iterator.next());
+        }
+        return true;
     }
 
+    @Override
     public boolean containsAll(Collection c) {
-        return false;
+        Iterator iterator = c.iterator();
+        while (iterator.hasNext()) {
+            if (!contains(iterator.next())) {
+                return false;
+            }
+        }
+        return true;
     }
 
+    @Override
     public Object[] toArray(Object[] a) {
-        return new Object[0];
+        trim();
+        return array;
     }
 
 
@@ -257,5 +296,21 @@ public class ArrayList<E> implements List<E>,Serializable {
                     numMoved);
         }
         array[--size] = null;
+    }
+
+    private void grow(int minCapacity) {
+        int oldCapacity = array.length;
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity < 0) {
+            newCapacity = minCapacity;
+        }
+        array = Arrays.copyOf(array, newCapacity);
+    }
+
+
+    private void ensureCapacity(int newCapacity) {
+        if (newCapacity > array.length) {
+            grow(newCapacity);
+        }
     }
 }
